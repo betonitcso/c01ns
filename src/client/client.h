@@ -11,15 +11,18 @@ using json = nlohmann::json;
 
 
 class Client {
-    private:
+    protected:
         string API_KEY;
         string API_SECRET;
+        string ACCT_ID;
+        bool ACCT_BLOCKED;
+        long double CASH ;
+        long double PORTFOLIO_VALUE;
+
         CURL* curl;
     public:
-        Client(void);
         Client(string public_key, string private_key);
         ~Client();
 
-        void  auth(string public_key, string private_key);
-        bool validateAccount(string public_key, string private_key);
+        bool connectAccount(string public_key, string private_key);
 };
