@@ -6,22 +6,27 @@
 #include <curl/curl.h>
 #include <vector>
 
+#include "../utils/alpaca_utils.h"
 #include "../utils/libcurl_utils.h"
 #include "../utils/json/single_include/nlohmann/json.hpp"
 
-
 using std::string;
 using json = nlohmann::json;
-using LibcurlUtils::alpacaAuthHeaders;
+using AlpacaUtils :: AlpacaAuthHeaders;
+
+enum Service {
+    CoinGecko,
+    Alpaca
+};
+
+string assetNameAdapter(Service s);
 
 class Asset {
     protected:
         string id;
         string symbol;
         string assetClass;
-        string exchange;
-        string status;
-        string timeStamp; // RFC-3339 timestamp
+        string last_updated;
         long double price;
         long double tradeSize;
         bool tradable;
@@ -30,8 +35,9 @@ class Asset {
         bool easyToBorrow;
         bool fractionable;
     public:
-        Asset(string symbol);
-        void get(string public_header, string private_header) ;
+        Asset(string symbol) :symbol(symbol) { };
+        void info();
+        bool get(string public_header, string private_header, Service service = CoinGecko) ;
 };
 
 

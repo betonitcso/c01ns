@@ -5,7 +5,10 @@
 #include <string>
 #include <vector>
 
+
 #include "../utils/json/single_include/nlohmann/json.hpp"
+
+class Contract {};
 
 using std::string;
 using nlohmann::json;
@@ -13,9 +16,9 @@ using nlohmann::json;
 class User {
 
 protected:
-
     long double ACCT_BALANCE;
     long double ACCT_PORTFOLIO_VALUE;
+    Contract* contracts;
 
 public:
     //constructor
@@ -36,8 +39,9 @@ protected:
     string APC_PRIVATE_KEY;
 
 public:
-    LiveUser(string public_key, string private_key);
-    virtual bool auth(string public_key, string private_key);
+    LiveUser(string public_key, string private_key); // constructor
+    virtual bool auth(string public_key, string private_key); // authorizes alpaca account
+    virtual void info(); // prints user information
 };
 
 
