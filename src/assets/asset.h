@@ -5,8 +5,10 @@
 #include <string>
 #include <curl/curl.h>
 #include <vector>
+#include <unistd.h>
 
-#include "../utils/alpaca_utils.h"
+
+#include "../utils/crypto_utils.h"
 #include "../utils/libcurl_utils.h"
 #include "../utils/json/single_include/nlohmann/json.hpp"
 
@@ -20,24 +22,46 @@ enum Service {
 };
 
 string assetNameAdapter(Service s);
+void strToLower(string& s);
 
 class Asset {
     protected:
+        string last_updated;
+
         string id;
         string symbol;
-        string assetClass;
-        string last_updated;
-        long double price;
-        long double tradeSize;
+        string name;
+        string created_at;
+
+        string description;
+        string github;
+        string homepage;
+
+        long double current_price;
+        long double market_cap;
+        long double ath;
+        double price_change_percentage[7];
+        double price_change_usd[7];
+        double market_cap_change_percentage_24h;
+
+        double sentiment[2];
+        double developer_score;
+        double community_score;
+        double liquidity_score;
+
+        unsigned int market_cap_rank;
+        
+        // Attributes for trading on Alpaca
+        long double trade_size;
         bool tradable;
         bool marginable;
         bool shortable;
         bool easyToBorrow;
         bool fractionable;
     public:
-        Asset(string symbol) :symbol(symbol) { };
-        void info();
-        bool get(string public_header, string private_header, Service service = CoinGecko) ;
+        Asset(string asset);
+        void info(bool verbose = false);
+        void get(bool live = false); // get data without alpaca
 };
 
 

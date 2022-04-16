@@ -6,45 +6,51 @@
 
 using std::string;
 
+class Client{};
+
 enum Mode {
+    paper,
     instant,
     strategy,
-    user,
-    data
 };
 
 
-class App {
-
-};
-
-class ClientHandler {
+class App : public CLIUtils :: CommandLineApp {
     Mode mode;
+    Client client;
     public:
-        ClientHandler(int argc, const char* argv[]) {
-            CLIUtils :: printInitMessage();
-
+        App(int argc, const char** argv) : CommandLineApp(argc, argv) {
             if(argc < 2) {
-                std::cerr << "[ERROR] No arguments given. See -h or --help for more." << std::endl;
+                std::cerr << "Not enough arguments given." << std::endl;
                 exit(1);
             }
-
-            if(!strcmp(argv[1], "buy") || !strcmp(argv[1], "sell")) {
-                std::cout << "You've called the C01NS instant interface." << std::endl;
-            } else if(!strcmp(argv[1], "execute")) {
-                std::cout << "You've called the C01NS trading strategy interface." << std::endl;
-            } else if(!strcmp(argv[1], "user")) {
-                std::cout << "You've called the C01NS user data interface." << std::endl;
-            } else if(!strcmp(argv[1], "data")) {
-                std::cout << "You've called the C01ns market data interface." << std::endl;
+            handleMode();
+        };
+        
+        void handleMode() {
+            if(findArg("paper")) {
+                mode = paper;
+                
+                if(!findArg("execute") || !findArg("user") || !findArg("data")) {
+                    std::cout << "[ERROR] Paper trading can only be used with these commands: \n\texecute\n\t user\n\tdata" << std::endl;
+                    exit(1);
+                }
+                std::cout << "[INFO] Mode set to paper trading." << std::endl;
+            } else if (findArg("execute")) {
+                mode = strategy;
+            } else if (findArg("user")) {
+                // call user data functions
+            } else if (findArg("data")) {
+                // call data functions
+            } else if(findArg("instant")) {
+                mode = instant;
             } else {
-                std::cout << "Invalid arguments. Type -help for help." << std::endl << std::endl;
-                exit(1);
+                std::cout << "[ERROR] Please enter a valid mode: \n\n\tinstant (default)\n\tpaper\n\texecute\n\tuser\n\tdata" << std::endl;
             }
         }
 };
 
 
-int main(int argc, const char* argv[]) {
-    ClientHandler(argc, argv);
+int main(int argc, const char** argv) {
+    App app(argc, argv);
 }

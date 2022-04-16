@@ -3,8 +3,51 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
+#include <cassert>
+
+using std::string;
 
 namespace CLIUtils {
+
+    class CommandLineApp {
+        int argc;
+        const char** argv;
+
+        public:
+        CommandLineApp(int argc, const char** argv) :argc(argc), argv(argv) {};
+
+        virtual int findArg(const char* str) {
+            for(int i = 1; i < argc; i++) {
+                if(!strcmp(str, argv[i])) {
+                    return i;
+                }
+            }
+            return 0;
+        }
+
+        virtual const char* getArgValue(const char* str) {
+            int idx = findArg(str);
+            assert(idx < argc);
+            if(idx) {
+                return argv[idx+1];
+            }
+            else return "";
+        }
+
+        virtual const char* getUserInput(string message = "") {
+            char* tmp;
+            std::cout << message;
+            std::cin >> tmp;
+            return tmp;
+        }
+
+    };
+
+    
+
+
+
     void printInitMessage() {
         std::cout << std::endl << "***************************************************" << std::endl 
             << R"(
