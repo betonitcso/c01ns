@@ -60,8 +60,8 @@ class Asset {
         bool fractionable;
     public:
         Asset(string asset);
-        void info(bool verbose = false);
-        void get(bool live = false); // get data without alpaca
+        void info(bool verbose = false); // if verbose: prints a lot of unnecessary stuff too
+        void get(bool live = false); // get data -  if live: get alpaca data too
 };
 
 

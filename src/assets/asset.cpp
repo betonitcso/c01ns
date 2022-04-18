@@ -122,8 +122,3 @@ void Asset::info(bool verbose) {
     << "--------------" << std::endl;
     
 };
-
-int main() {
-   Asset btc("cardano");
-   btc.info(false);
-}
