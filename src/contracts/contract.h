@@ -28,9 +28,6 @@ protected:
     long double amount;
     long double price;
 public:
-    virtual bool make() = 0;
-    virtual bool cancel() = 0;
-    virtual bool close() = 0;
 
     Status getStatus();
     int getOpenTimeStamp();

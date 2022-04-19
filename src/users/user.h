@@ -12,36 +12,28 @@
 using std::string;
 using nlohmann::json;
 
-class User {
+class LiveUser {
 
-protected:
-    long double ACCT_BALANCE;
-    long double ACCT_PORTFOLIO_VALUE;
-    Contract* contracts;
+    string public_key;
+    string private_key;
+    bool acct_blocked;
+    int created_at;
 
-public:
-    //constructor
-    User(long double balance) : ACCT_BALANCE(balance) {};
-};
+    long double cash;
+    long double portfolio_value;
+    long double equity;
+    long double initial_margin;
+    long double buying_power;
 
-
-class PaperUser : public User{
-public:
-    PaperUser(long double balance = 10000.0) : User(balance) {};
-    void setBalance(long double amount);
-};
-
-class LiveUser : public User {
-
-protected:
-    string APC_PUBLIC_KEY;
-    string APC_PRIVATE_KEY;
+    std::vector<Contract*> contracts;
 
 public:
-    LiveUser(string public_key, string private_key); // constructor
-    virtual bool auth(string public_key, string private_key); // authorizes alpaca account
-    virtual void info(); // prints user information
-};
+    LiveUser(string public_key, string private_key);
+    bool make(Contract contract);
+    bool cancel(Contract contract);
 
+    std::vector<Contract*> getActiveContracts();
+
+};
 
 #endif

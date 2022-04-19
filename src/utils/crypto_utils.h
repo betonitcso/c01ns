@@ -1,15 +1,18 @@
-#ifndef ALPACA_UTILS_H
-#define ALPACA_UTILS_H
+#ifndef CRYPTO_UTILS_H
+#define CRYPTO_UTILS_H
 
 #include <curl/curl.h>
 #include <string>
 #include <tuple>
 #include <vector>
 
-using std::string;
-using std::tuple;
+#include "../assets/asset.h"
+#include "./json/single_include/nlohmann/json.hpp"
 
-namespace AlpacaUtils {
+using nlohmann::json;
+using std::string;
+
+namespace  CryptoUtils {
     curl_slist* AlpacaAuthHeaders(string public_key, string private_key) {
         curl_slist* auth = nullptr;
         string alpaca_public = "APCA-API-KEY-ID:";
@@ -20,6 +23,27 @@ namespace AlpacaUtils {
         curl_slist_append(auth, alpaca_public.c_str());
         curl_slist_append(auth, alpaca_private.c_str());
         return auth;
+    }
+
+
+    class AlpacaOrderQuery{
+        string query;
+        string symbol;
+    public:
+        AlpacaOrderQuery(string symbol) : symbol(symbol) {
+            query = "{\n\t\"symbol\" : \"";
+            query += symbol + "\"";
+        };
+        void addString(string key, string value) {
+            query += "\n\t\"" + key + "\":\"" + value + "\"";
+        }
+        void addDouble(string key, double value) {
+            query += "\n\t\"" + key + "\":\"" + value + "\"";
+        }
+        string makeQuery() {
+            query += "\n}";
+            return query;
+        }
     };
 
 };

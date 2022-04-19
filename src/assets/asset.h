@@ -8,13 +8,11 @@
 #include <unistd.h>
 
 
-#include "../utils/crypto_utils.h"
 #include "../utils/libcurl_utils.h"
 #include "../utils/json/single_include/nlohmann/json.hpp"
 
 using std::string;
 using json = nlohmann::json;
-using AlpacaUtils :: AlpacaAuthHeaders;
 
 enum Service {
     CoinGecko,
@@ -62,6 +60,10 @@ class Asset {
         Asset(string asset);
         void info(bool verbose = false); // if verbose: prints a lot of unnecessary stuff too
         void get(bool live = false); // get data -  if live: get alpaca data too
+
+        string getSymbol() {
+            return symbol;
+        }
 };
 
 
