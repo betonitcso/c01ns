@@ -48,7 +48,7 @@ Asset::Asset(string asset) {
     name = "";
 }
 
-void Asset::get(bool live) {
+void Asset::get() {
     CURL* curl = curl_easy_init();
     json parsedResponse;
     string response;
@@ -98,6 +98,7 @@ void Asset::get(bool live) {
     market_cap_change_percentage_24h = marketData.value("market_cap_change_percentage_24h", json());
 
     curl_easy_cleanup(curl);
+
 }
 
 
@@ -120,5 +121,36 @@ void Asset::info(bool verbose) {
     <<"Github: " <<  github << std::endl
     << "Homepage: " << homepage << std::endl
     << "--------------" << std::endl;
-    
 };
+
+LiveAsset :: LiveAsset(string asset) {
+    CURL* curl = curl_easy_init();
+    json parsedResponse;
+    string response;
+
+    this->get();
+
+    string tokenURL = "https://api.alpaca.markets/v2/assets/";
+    tokenURL += this->symbol;
+
+    curl_easy_setopt(curl, CURLOPT_URL, tokenURL.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, LibcurlUtils :: writeCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+    std::cout << "Searching for " << id << " @ https://api.alpaca.markets/v2/assets" << std::endl;
+    curl_easy_perform(curl);
+    try {
+        parsedResponse = json::parse(response);
+        is_tradable = parsedResponse.value("tradable", false);
+        is_marginable = parsedResponse.value("marginable", false);
+        is_shortable = parsedResponse.value("shortable", false);
+        is_easy_to_borrow = parsedResponse.value("easy_to_borrow", false);
+        is_fractionable = parsedResponse.value("fractionable", false);
+        is_alpaca_supported = true;
+    }
+    catch( ... ) {
+        is_alpaca_supported = false;
+    }
+    
+    curl_easy_cleanup(curl);
+}

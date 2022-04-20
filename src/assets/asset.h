@@ -48,22 +48,29 @@ class Asset {
         double liquidity_score;
 
         unsigned int market_cap_rank;
-        
-        // Attributes for trading on Alpaca
-        long double trade_size;
-        bool tradable;
-        bool marginable;
-        bool shortable;
-        bool easyToBorrow;
-        bool fractionable;
     public:
         Asset(string asset);
         void info(bool verbose = false); // if verbose: prints a lot of unnecessary stuff too
-        void get(bool live = false); // get data -  if live: get alpaca data too
+        void get(); // get data -  if live: get alpaca data too
 
         string getSymbol() {
             return symbol;
         }
+};
+
+class LiveAsset : public Asset {
+    protected:
+        long double trade_size;
+        string status;
+        bool is_alpaca_supported;
+        bool is_tradable;
+        bool is_marginable;
+        bool is_shortable;
+        bool is_easy_to_borrow;
+        bool is_fractionable;
+
+    public:
+        LiveAsset(string asset) : Asset(asset) {};
 };
 
 
