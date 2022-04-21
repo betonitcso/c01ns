@@ -1,19 +1,25 @@
 #include "./client.h"
 
-Request :: Request (CURL* curl, string body) {
+Response :: Response (CURL* curl, string body) {
     curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &http_code);
     response = json :: parse(body);
 }
 
-long int Request :: getHTTPCode() {
+Response& Response :: operator=(const Response& res) {
+    http_code = res.http_code;
+    response = res.response;
+    return *this;
+}
+
+long int Response :: getHTTPCode() {
     return http_code;
 }
 
-json Request :: getResponse() {
+json Response :: getResponse() {
     return response;
 }
 
-Request Client :: get(string URL, string query, curl_slist* headers) {
+Response Client :: get(string URL, string query, curl_slist* headers) {
     string body;
     curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, LibcurlUtils::writeCallback);
@@ -22,20 +28,17 @@ Request Client :: get(string URL, string query, curl_slist* headers) {
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     }
     curl_easy_perform(curl);
-    Request req(curl, body);
+    Response req(curl, body);
     curl_easy_cleanup(curl);
     curl_slist_free_all(headers);
     return req;
 }
 
-void Client :: auth(string public_key, string private_key) {
+void Client :: alpacaAuth(string public_key, string private_key) {
     curl_slist* auth_headers = NULL;
-    string public_header = "APCA-API-KEY-ID:" + public_key;
-    string private_header = "APCA-API-SECRET-KEY:" + private_key;
-    auth_headers = curl_slist_append(auth_headers, public_header.c_str());
-    auth_headers = curl_slist_append(auth_headers, private_header.c_str());
+    auth_headers = CryptoUtils :: AlpacaAuthHeaders(public_key, private_key);
 
-    Request account = this->get("https://api.alpaca.markets/v2/account", "", auth_headers);
+    Response account = this->get("https://api.alpaca.markets/v2/account", "", auth_headers);
     if(account.getHTTPCode() == 200) {
         APCA_PUBLIC_KEY = public_key;
         APCA_PRIVATE_KEY = private_key;
@@ -43,4 +46,12 @@ void Client :: auth(string public_key, string private_key) {
         std::cout << "[ERROR] Invalid credentials." << std::endl;
         exit(1);
     }
+}
+
+string Client :: getPublicKey() {
+    return APCA_PUBLIC_KEY;
+}
+
+string Client :: getPrivateKey() {
+    return APCA_PRIVATE_KEY;
 }

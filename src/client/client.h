@@ -1,24 +1,26 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <vector>
 #include <string>
 #include <curl/curl.h>
 #include  <iostream>
 #include "../utils/json/single_include/nlohmann/json.hpp"
+#include "../utils/crypto_utils.h"
 #include "../utils/libcurl_utils.h"
 
 using nlohmann:: json;
 using std::string;
 
-class Request {
+class Response {
 private:
     long int http_code;
     json response;
 public:
-    Request (CURL* curl, string body) ;
+    Response (CURL* curl, string body) ;
     long int getHTTPCode();
     json getResponse();
+
+    Response& operator=(const Response& res);
 };
 
 class Client {
@@ -28,13 +30,16 @@ protected:
     string APCA_PRIVATE_KEY;
 public:
 
+    void printGarbage();
+
     Client() {
         curl = curl_easy_init();
     }
 
-    Request get(string URL, string query = "", curl_slist* headers = NULL);
-
-    void auth(string public_key, string private_key);
+    Response get(string URL, string query = "", curl_slist* headers = NULL);
+    void alpacaAuth(string public_key, string private_key);
+    string getPublicKey();
+    string getPrivateKey();
 };
 
 

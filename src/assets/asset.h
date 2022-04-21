@@ -7,8 +7,8 @@
 #include <vector>
 #include <unistd.h>
 
-
-#include "../utils/libcurl_utils.h"
+#include "../client/client.h"
+#include "../utils/crypto_utils.h"
 #include "../utils/json/single_include/nlohmann/json.hpp"
 
 using std::string;
@@ -70,7 +70,7 @@ class LiveAsset : public Asset {
         bool is_fractionable;
 
     public:
-        LiveAsset(string asset) : Asset(asset) {};
+        LiveAsset(string asset, string public_key, string private_key) : Asset(asset) {};
 };
 
 

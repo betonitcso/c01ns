@@ -18,7 +18,6 @@ enum Status  {
     closed
 };
 
-
 class Order {
 protected:
     Status status;
@@ -35,8 +34,8 @@ public:
     int getCloseTimestamp();
     long double getAmount();
     long double getPrice();
-    long double getPerformance();
-    void info();
+    virtual long double getPerformance();
+    virtual void info();
 };
 
 class LiveOrder : public Order {
