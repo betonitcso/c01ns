@@ -137,7 +137,7 @@ LiveAsset :: LiveAsset(string asset) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, LibcurlUtils :: writeCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
-    std::cout << "Searching for " << id << " @ https://api.alpaca.markets/v2/assets" << std::endl;
+    std::cout << "Searching for " << strtoupper(symbol) << " @ https://api.alpaca.markets/v2/assets" << std::endl;
     curl_easy_perform(curl);
     try {
         parsedResponse = json::parse(response);

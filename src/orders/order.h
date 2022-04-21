@@ -1,5 +1,5 @@
-#ifndef CONTRACT_H
-#define CONTRACT_H
+#ifndef ORDER_H
+#define ORDER_H
 
 #include <string>
 #include <iostream>
@@ -19,7 +19,7 @@ enum Status  {
 };
 
 
-class Contract {
+class Order {
 protected:
     Status status;
     int open_timestamp;
@@ -30,6 +30,7 @@ protected:
 public:
 
     Status getStatus();
+    virtual bool execute( ... );
     int getOpenTimeStamp();
     int getCloseTimestamp();
     long double getAmount();
@@ -38,11 +39,11 @@ public:
     void info();
 };
 
-class LiveContract : public Contract {
+class LiveOrder : public Order {
     string user; // API key of user that made contract
 public:
-    LiveContract(string public_key) : Contract() {};
-    bool make();
+    LiveOrder(string public_key, string private_key) : Order() {};
+    bool execute();
     bool cancel();
     bool close();
 };

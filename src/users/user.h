@@ -7,7 +7,7 @@
 
 
 #include "../utils/json/single_include/nlohmann/json.hpp"
-#include "../contracts/contract.h"
+#include "../orders/order.h"
 
 using std::string;
 using nlohmann::json;
