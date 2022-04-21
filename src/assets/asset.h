@@ -70,7 +70,7 @@ class LiveAsset : public Asset {
         bool is_fractionable;
 
     public:
-        LiveAsset(string asset, string public_key, string private_key) : Asset(asset) {};
+        LiveAsset(string asset, string public_key, string private_key);
 };
 
 

@@ -19,7 +19,8 @@ string strtoupper(string str) {
 string assetNameAdapter(string asset, Service service = CoinGecko) {
     asset = strtolower(asset);
     Client client;
-    json response = client.get("https://api.coingecko.com/api/v3/coins/list").getResponse();
+    Response res = client.get("https://api.coingecko.com/api/v3/coins/list");
+    json response = res.getResponse();
 
     for(unsigned int i = 0; i < response.size(); i++) {
         string id = response[i].value("id", "");
@@ -44,7 +45,8 @@ void Asset::get() {
     tokenURL += id + "?localization=false&tickers=false&sparkline=false";
 
     std::cout << "Searching for " << id << " @ https://api.coingecko.com/api/v3/coins/" << std::endl;
-    json response = client.get(tokenURL).getResponse();
+    Response res = client.get(tokenURL);
+    json response = res.getResponse();
     json marketData = response.value("market_data", json());
 
     // fill up object with asset data
@@ -99,7 +101,7 @@ void Asset::info(bool verbose) {
 };
 
 
-LiveAsset :: LiveAsset(string asset, string public_key, string private_key) {
+LiveAsset :: LiveAsset(string asset, string public_key, string private_key) : Asset(asset) {
     Client client;
     string tokenURL = "https://api.alpaca.markets/v2/assets/" + this->symbol;
 
@@ -121,4 +123,9 @@ LiveAsset :: LiveAsset(string asset, string public_key, string private_key) {
         is_alpaca_supported = false;
     }
     
+}
+
+int main() {
+    Asset btc("bitcoin");
+    btc.info();
 }
