@@ -38,7 +38,7 @@ namespace  CryptoUtils {
             query += "\n\t\"" + key + "\":\"" + value + "\"";
         }
         void addDouble(string key, double value) {
-            query += "\n\t\"" + key + "\":\"" + value + "\"";
+            query += "\n\t\"" + key + "\":\"" + (char) value + "\"";
         }
         string makeQuery() {
             query += "\n}";
