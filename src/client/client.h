@@ -30,14 +30,14 @@ protected:
     string APCA_PRIVATE_KEY;
 public:
 
-    void printGarbage();
-
     Client() {
         curl = curl_easy_init();
     }
 
     Response get(string URL, string query = "", curl_slist* headers = NULL);
+
     void alpacaAuth(string public_key, string private_key);
+    
     string getPublicKey();
     string getPrivateKey();
 };

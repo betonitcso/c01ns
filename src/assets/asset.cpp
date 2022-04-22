@@ -46,36 +46,47 @@ void Asset::get() {
 
     std::cout << "Searching for " << id << " @ https://api.coingecko.com/api/v3/coins/" << std::endl;
     Response res = client.get(tokenURL);
-    json response = res.getResponse();
-    json marketData = response.value("market_data", json());
+    if(res.getHTTPCode() != 200) {
+        std :: cout << "[ERR] Couldn't find token." << std::endl;
+        exit(1);
+    }
+    try {
+        json response = res.getResponse();
+        json marketData = response.value("market_data", json());
 
-    // fill up object with asset data
-    name = response.value("name", "N/A");
-    created_at = response.value("genesis-date", "N/A");
-    description = response.value("description", json()).value("en", "N/A");
-    github = response.value("links", json()).value("repos_url", json()).value("github", json())[0];
-    homepage = response.value("links", json()).value("homepage", json())[0];
-    current_price = marketData.value("current_price", json()).value("usd", -1.0);
-    market_cap = marketData.value("market_cap", json()).value("usd", -1.0);
-    ath = marketData.value("ath", json()).value("usd", -1.0);
+        // fill up object with asset data
+        name = response.value("name", "N/A");
+        created_at = response.value("genesis-date", "N/A");
+        description = response.value("description", json()).value("en", "N/A");
+        github = response.value("links", json()).value("repos_url", json()).value("github", json())[0];
+        homepage = response.value("links", json()).value("homepage", json())[0];
+        current_price = marketData.value("current_price", json()).value("usd", -1.0);
+        market_cap = marketData.value("market_cap", json()).value("usd", -1.0);
+        ath = marketData.value("ath", json()).value("usd", -1.0);
 
-    price_change_percentage[0] = marketData.value("price_change_percentage_24h", -1.0); // 1 day
-    price_change_percentage[1] = marketData.value("price_change_percentage_7d", -1.0); // 1 week
-    price_change_percentage[2] = marketData.value("price_change_percentage_14d", -1.0); // 2 weeks
-    price_change_percentage[3] = marketData.value("price_change_percentage_30d", -1.0); // 1 mo.
-    price_change_percentage[4] = marketData.value("price_change_percentage_60d", -1.0); // 2 months
-    price_change_percentage[5] = marketData.value("price_change_percentage_200d", -1.0); // 200 days
-    price_change_percentage[6] = marketData.value("price_change_percentage_1y", -1.0); // 1 year
+        price_change_percentage[0] = marketData.value("price_change_percentage_24h", -1.0); // 1 day
+        price_change_percentage[1] = marketData.value("price_change_percentage_7d", -1.0); // 1 week
+        price_change_percentage[2] = marketData.value("price_change_percentage_14d", -1.0); // 2 weeks
+        price_change_percentage[3] = marketData.value("price_change_percentage_30d", -1.0); // 1 mo.
+        price_change_percentage[4] = marketData.value("price_change_percentage_60d", -1.0); // 2 months
+        price_change_percentage[5] = marketData.value("price_change_percentage_200d", -1.0); // 200 days
+        price_change_percentage[6] = marketData.value("price_change_percentage_1y", -1.0); // 1 year
 
-    price_change_usd[0] = marketData.value("price_change_percentage_24h_in_currency", json()).value("usd", -1.0); // 1 day
-    price_change_usd[1] = marketData.value("price_change_percentage_7d_in_currency", json()).value("usd", -1.0); // 1 week
-    price_change_usd[2] = marketData.value("price_change_percentage_14d_in_currency", json()).value("usd", -1.0); // 2 weeks
-    price_change_usd[3] = marketData.value("price_change_percentage_30d_in_currency", json()).value("usd", -1.0); // 1 mo.
-    price_change_usd[4] = marketData.value("price_change_percentage_60d_in_currency", json()).value("usd", -1.0); // 2 months
-    price_change_usd[5] = marketData.value("price_change_percentage_200d_in_currency", json()).value("usd", -1.0); // 200 days
-    price_change_usd[6] = marketData.value("price_change_percentage_1y_in_currency", json()).value("usd", -1.0); // 1 year
+        price_change_usd[0] = marketData.value("price_change_percentage_24h_in_currency", json()).value("usd", -1.0); // 1 day
+        price_change_usd[1] = marketData.value("price_change_percentage_7d_in_currency", json()).value("usd", -1.0); // 1 week
+        price_change_usd[2] = marketData.value("price_change_percentage_14d_in_currency", json()).value("usd", -1.0); // 2 weeks
+        price_change_usd[3] = marketData.value("price_change_percentage_30d_in_currency", json()).value("usd", -1.0); // 1 mo.
+        price_change_usd[4] = marketData.value("price_change_percentage_60d_in_currency", json()).value("usd", -1.0); // 2 months
+        price_change_usd[5] = marketData.value("price_change_percentage_200d_in_currency", json()).value("usd", -1.0); // 200 days
+        price_change_usd[6] = marketData.value("price_change_percentage_1y_in_currency", json()).value("usd", -1.0); // 1 year
 
-    market_cap_change_percentage_24h = marketData.value("market_cap_change_percentage_24h", json());
+        market_cap_change_percentage_24h = marketData.value("market_cap_change_percentage_24h", json());
+    }
+    catch(nlohmann :: detail :: type_error) {
+        std::cout << "[ERROR] An error occurred while parsing response from CoinGecko. Multiple assets might belong to the same symbol." << std::endl;
+        std::cout << "Try using the -i [coingecko_id] argument instead." << std::endl;
+        exit(1);
+    }
 }
 
 
@@ -122,10 +133,4 @@ LiveAsset :: LiveAsset(string asset, string public_key, string private_key) : As
     catch( ... ) {
         is_alpaca_supported = false;
     }
-    
-}
-
-int main() {
-    Asset btc("bitcoin");
-    btc.info();
 }
