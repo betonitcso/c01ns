@@ -24,28 +24,6 @@ namespace  CryptoUtils {
         auth = curl_slist_append(auth, alpaca_private.c_str());
         return auth;
     }
-
-
-    class AlpacaOrderQuery{
-        string query;
-        string symbol;
-    public:
-        AlpacaOrderQuery(string symbol) : symbol(symbol) {
-            query = "{\n\t\"symbol\" : \"";
-            query += symbol + "\"";
-        };
-        void addString(string key, string value) {
-            query += "\n\t\"" + key + "\":\"" + value + "\"";
-        }
-        void addDouble(string key, double value) {
-            query += "\n\t\"" + key + "\":\"" + (char) value + "\"";
-        }
-        string makeQuery() {
-            query += "\n}";
-            return query;
-        }
-    };
-
 };
 
 
