@@ -2,22 +2,18 @@
 
 // Functions for Option class
 
-void Option :: setActive() {
-    active = true;
+void Option :: setRouter(Router* r) {
+    router = r;
 }
 
-bool Option :: isActive() {
-    return active;
+Option :: operator bool() const {
+    if(router->getArg(key) != "") {
+        return true;
+    } else return false;
 }
 
 string Option :: getKey() {
     return this->key;
-}
-
-bool operator==(Option& opt1, Option& opt2) {
-    if(opt1.getKey() == opt2.getKey()) {
-        return true;
-    } return false;
 }
 
 void InputOption :: setValue(string val) {
@@ -84,14 +80,23 @@ void Router :: run() {
 
 Mode :: Mode(Router& r) :router(r.getRouter()) { }
 
+Mode :: Mode(Router* r) : router(r->getRouter()) {} 
+
 void Mode :: option(Option* opt) {
-    options.insert(opt);
+    for(auto storedOpt : options) {
+        if(opt->getKey() == storedOpt->getKey()) {
+            std :: cerr << "[ERROR] Two options can't have the same keys within a mode." << std :: endl;
+            exit(1);
+        }
+    }
+    options.push_back(opt);
 }
 
 void Mode :: run() {
-    for(Option* opt : options) {
-        if(router.getArg(opt->getKey()) != "") {
-            opt->setActive();
+    for(auto opt : options) {
+        opt->setRouter(&router);
+        if(*opt) {
+            std :: cout << "Option " << opt->getKey() << " found!!" << std :: endl;
         }
     }
 }
@@ -101,25 +106,20 @@ void Instant :: run() {
     Mode :: run();
 }
 
-void Strategy :: run() {
-    std :: cout << "Called the Strategy interface."  << std :: endl;
-}
-
-void Data :: run() {
-    std :: cout << "Called the Data interface." << std :: endl;
-}
 
 int main(int argc, char** argv) {
-    Router router(argc, argv);
+    Router* router = new Router(argc, argv);
 
-    Option* myOption = new Option("printMe", true);
-    InputOption* myInputOption = new InputOption("-name", "buy");
+    Option* buyOption = new Option("buy");
+    Option* sellOption = new Option("sell");
     
     Instant* mode = new Instant(router);
-    mode->option(myOption);
-    mode->option(myInputOption);
+    mode->option(buyOption);
+    mode->option(sellOption);
 
-    router.route("instant", mode);
-    router.run();
+
+
+    router->route("instant", mode);
+    router->run();
     
 }

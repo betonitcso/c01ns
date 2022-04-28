@@ -4,7 +4,8 @@
 #include <string>
 #include <iostream>
 #include <unordered_map>
-#include <unordered_set>
+#include <vector>
+#include <functional>
 
 using std::string;
 
@@ -15,22 +16,26 @@ class Option;
 class Mode {
 protected:
     Router& router;
-    std :: unordered_set<Option*> options;
+    std :: vector<Option*> options;
 public:
     explicit Mode(Router& r);
-    virtual void option(Option* opt);
+    explicit Mode(Router* r);
+    void option(Option* opt);
+    bool getOpt(string opt);
+    string getInputOpt(string opt);
     virtual void run();
 };
 
 class Option{
     bool active;
     string key;
+    Router* router;
 public:
-    Option(string key) : key(key), active(false);
     explicit Option(string key, bool defaultActive = false) : key(key), active(defaultActive) {};
-    void setActive();
-    bool isActive();
+    void setRouter(Router* r);
     string getKey();
+
+    operator bool() const;
 };
 
 class InputOption : public Option {
@@ -55,20 +60,18 @@ public:
     void switchRoute(string opt);
     Router& getRouter();
     string getArg(string arg, unsigned int atIndex = 0);
+    string getArgValue(string arg, unsigned int atIndex = 0);
+    unsigned int getArgIndex(string arg);
 };
 
 class Instant : public Mode {
 public:
     Instant(Router& r) : Mode :: Mode(r) {};
+    Instant(Router* r) : Mode :: Mode(r) {};
     void run();
 };
 
 class Strategy : public Mode {
-public:
-    void run();
-};
-
-class Data : public Mode {
 public:
     void run();
 };
