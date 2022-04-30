@@ -111,18 +111,27 @@ void Asset::info(bool verbose) {
     << "--------------" << std::endl;
 };
 
+LiveAsset :: LiveAsset(string asset) : Asset :: Asset(asset) {
+    this->get();
+}
+
 
 LiveAsset :: LiveAsset(string asset, string public_key, string private_key) : Asset(asset) {
     Client client;
     string tokenURL = "https://api.alpaca.markets/v2/assets/" + this->symbol;
+    curl_slist* auth_headers = NULL;
 
     this->get();
-    client.alpacaAuth(public_key, private_key);
-    curl_slist* auth_headers = CryptoUtils :: AlpacaAuthHeaders(client.getPublicKey(), client.getPrivateKey());
+    auth_headers = CryptoUtils :: AlpacaAuthHeaders(public_key, private_key);
+
+    if(client.get("https://api.alpaca.markets/v2/account", auth_headers).getHTTPCode() != 200) {
+        std :: cerr << "[ERROR] Failed Alpaca authentication." << std :: endl;
+        exit(1);
+    }
 
     std::cout << "Searching for " << strtoupper(symbol) << " @ https://api.alpaca.markets/v2/assets" << std::endl;
     try {
-        json response = client.get(tokenURL, "", auth_headers).getResponse();
+        json response = client.get(tokenURL, auth_headers).getResponse();
         is_tradable = response.value("tradable", false);
         is_marginable = response.value("marginable", false);
         is_shortable = response.value("shortable", false);

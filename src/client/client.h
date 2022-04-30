@@ -5,10 +5,10 @@
 #include <curl/curl.h>
 #include  <iostream>
 #include "../utils/json/single_include/nlohmann/json.hpp"
-#include "../utils/crypto_utils.h"
 #include "../utils/libcurl_utils.h"
 
 using nlohmann:: json;
+using ojson = nlohmann :: ordered_json;
 using std::string;
 
 class Response {
@@ -26,17 +26,14 @@ public:
 class Client {
 protected:
     CURL* curl;
-    string APCA_PUBLIC_KEY;
-    string APCA_PRIVATE_KEY;
 public:
 
     Client() {
         curl = curl_easy_init();
     }
 
-    Response get(string URL, string query = "", curl_slist* headers = NULL);
-
-    void alpacaAuth(string public_key, string private_key);
+    Response get(string URL, curl_slist* headers = NULL);
+    Response post(string URL, json query, curl_slist* headers = NULL);
     
     string getPublicKey();
     string getPrivateKey();

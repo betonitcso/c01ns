@@ -19,7 +19,7 @@ json Response :: getResponse() {
     return response;
 }
 
-Response Client :: get(string URL, string query, curl_slist* headers) {
+Response Client :: get(string URL, curl_slist* headers) {
     string body;
     curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, LibcurlUtils::writeCallback);
@@ -34,24 +34,45 @@ Response Client :: get(string URL, string query, curl_slist* headers) {
     return req;
 }
 
-void Client :: alpacaAuth(string public_key, string private_key) {
-    curl_slist* auth_headers = NULL;
-    auth_headers = CryptoUtils :: AlpacaAuthHeaders(public_key, private_key);
 
-    Response account = this->get("https://api.alpaca.markets/v2/account", "", auth_headers);
-    if(account.getHTTPCode() == 200) {
-        APCA_PUBLIC_KEY = public_key;
-        APCA_PRIVATE_KEY = private_key;
-    } else if (account.getHTTPCode() >= 400) {
-        std::cout << "[ERROR] Invalid credentials." << std::endl;
-        exit(1);
+Response Client :: post(string URL, json query, curl_slist* headers) {
+    string body;
+    // WEIRD BUG: alpaca doesn't accept dumped ordered_json or basic_json, but if you dump->parse->dump->c_str(), it works.
+    string newQuery = json :: parse(query.dump()).dump();
+
+    curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, LibcurlUtils::writeCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, newQuery.c_str());
+    if(headers) {
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     }
+    curl_easy_perform(curl);
+    Response req(curl, body);
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(headers);
+    return req;
 }
 
-string Client :: getPublicKey() {
-    return APCA_PUBLIC_KEY;
-}
+/*
 
-string Client :: getPrivateKey() {
-    return APCA_PRIVATE_KEY;
+Usage:
+int main() {
+    json query = {
+        {"symbol" , "BTCUSD"},
+        {"notional" , 5.0},
+        {"side" , "buy"}, 
+        {"type" , "market"},
+        {"time_in_force" ,"ioc"}
+    };
+
+    curl_slist* auth = nullptr;
+    auth = curl_slist_append(auth, "your_alpaca_public_key_header");
+    auth = curl_slist_append(auth, "your_alpaca_private_key_header");
+
+    Client client;
+    Response r = client.post("https://api.alpaca.markets/v2/orders", query, auth);
+
+    std :: cout << std :: setw(4) << r.getResponse() << std :: endl;
 }
+*/

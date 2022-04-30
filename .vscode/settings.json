@@ -54,6 +54,7 @@
         "map": "cpp",
         "ratio": "cpp",
         "iomanip": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "unordered_set": "cpp"
     }
 }

@@ -3,7 +3,6 @@
 
 #include <string>
 #include <iostream>
-#include <vector>
 #include <curl/curl.h>
 
 #include "../utils/json/single_include/nlohmann/json.hpp"
@@ -23,28 +22,27 @@ protected:
     Status status;
     int open_timestamp;
     int close_timestamp;
-    std::vector<Asset> assets;
-    long double amount;
-    long double price;
+    Asset* asset;
 public:
-
-    Status getStatus();
-    virtual bool execute( ... );
-    int getOpenTimeStamp();
-    int getCloseTimestamp();
-    long double getAmount();
-    long double getPrice();
-    virtual long double getPerformance();
+    Order(string asset);
+    Order(Asset* asset);
+    virtual bool execute();
     virtual void info();
 };
 
 class LiveOrder : public Order {
-    string user; // API key of user that made contract
+protected:
+    string account; // API key of user that made contract
+    json query;
 public:
-    LiveOrder(string public_key, string private_key) : Order() {};
-    bool execute();
-    bool cancel();
-    bool close();
+    LiveOrder(Asset* asset) : Order :: Order(asset) {};
+    LiveOrder(string asset) : Order :: Order(asset) {};
+    virtual bool execute(string public_key, string private_key);
+    virtual bool execute();
+    virtual bool cancel();
+    virtual bool close();
+
+    json& operator[](string param);
 };
 
 #endif

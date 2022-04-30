@@ -71,6 +71,7 @@ class LiveAsset : public Asset {
 
     public:
         LiveAsset(string asset, string public_key, string private_key);
+        LiveAsset(string asset);
 };
 
 
