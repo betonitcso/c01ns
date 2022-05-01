@@ -19,6 +19,7 @@ class User {
 protected:
     string APCA_PUBLIC_KEY;
     string APCA_PRIVATE_KEY;
+    json data;
     std :: vector<LiveOrder*> orders;
 public:
     User(string public_key, string private_key);
@@ -26,10 +27,10 @@ public:
     bool auth();
 
     virtual void userInfo();
+     virtual json getUserData();
 
     virtual std :: vector<LiveOrder*> getOrders(bool active = false, bool pending = false, bool closed = false);
     virtual LiveAsset* getAsset(string asset);
-    virtual json getUserData();
     virtual string getPrivateKey();
     virtual string getPublicKey();
 

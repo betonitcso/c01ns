@@ -3,8 +3,6 @@
 
 #include <iostream>
 #include <string>
-#include <cstring>
-#include <cassert>
 
 using std::string;
 

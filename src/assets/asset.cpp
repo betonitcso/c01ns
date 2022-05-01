@@ -47,7 +47,7 @@ void Asset::get() {
     std::cout << "Searching for " << id << " @ https://api.coingecko.com/api/v3/coins/" << std::endl;
     Response res = client.get(tokenURL);
     if(res.getHTTPCode() != 200) {
-        std :: cout << "[ERR] Couldn't find token." << std::endl;
+        std :: cerr << "[ERR] Couldn't find token." << std::endl;
         exit(1);
     }
     try {
@@ -87,6 +87,11 @@ void Asset::get() {
         std::cout << "Try using the -i [coingecko_id] argument instead." << std::endl;
         exit(1);
     }
+}
+
+bool Asset :: isAlpacaSupported() {
+    std :: cerr << "[WARNING] Simple assets aren't supported by Alpaca. Please use LiveAsset instead." << std :: endl;
+    return false;
 }
 
 
@@ -142,4 +147,13 @@ LiveAsset :: LiveAsset(string asset, string public_key, string private_key) : As
     catch( ... ) {
         is_alpaca_supported = false;
     }
+}
+
+void LiveAsset :: info(bool verbose) {
+    Asset :: info();
+    std :: cout << "Alpaca asset data: " << std :: endl;
+}
+
+bool LiveAsset :: isAlpacaSupported() {
+    return is_alpaca_supported;
 }

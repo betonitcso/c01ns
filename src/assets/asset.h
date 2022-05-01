@@ -48,21 +48,23 @@ class Asset {
         double liquidity_score;
 
         unsigned int market_cap_rank;
+
+        bool is_alpaca_supported;
     public:
         Asset(string asset);
-        void info(bool verbose = false); // if verbose: prints a lot of unnecessary stuff too
+        virtual void info(bool verbose = false); // if verbose: prints unnecessary stuff too
         void get(); // get data -  if live: get alpaca data too
 
         string getSymbol() {
             return symbol;
         }
+        bool isAlpacaSupported();
 };
 
 class LiveAsset : public Asset {
     protected:
         long double trade_size;
         string status;
-        bool is_alpaca_supported;
         bool is_tradable;
         bool is_marginable;
         bool is_shortable;
@@ -72,6 +74,8 @@ class LiveAsset : public Asset {
     public:
         LiveAsset(string asset, string public_key, string private_key);
         LiveAsset(string asset);
+        bool isAlpacaSupported();
+        virtual void info(bool verbose = false);
 };
 
 

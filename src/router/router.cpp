@@ -25,7 +25,7 @@ bool Option :: isActive() {
 }
 
 /*
-void Option :: notCompatibleWith(string opt) {
+void Option :: incompatibleWith(string opt) {
     for(string option : this->incompatibleOptions) {
         if(opt == option) return;
     }

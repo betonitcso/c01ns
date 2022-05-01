@@ -1,14 +1,10 @@
 #include "./client.h"
 
+// METHODS OF RESPONSE CLASS
+
 Response :: Response (CURL* curl, string body) {
     curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &http_code);
     response = json :: parse(body);
-}
-
-Response& Response :: operator=(const Response& res) {
-    http_code = res.http_code;
-    response = res.response;
-    return *this;
 }
 
 long int Response :: getHTTPCode() {
@@ -18,6 +14,8 @@ long int Response :: getHTTPCode() {
 json Response :: getResponse() {
     return response;
 }
+
+// METHODS OF CLIENT CLASS
 
 Response Client :: get(string URL, curl_slist* headers) {
     string body;
@@ -33,7 +31,6 @@ Response Client :: get(string URL, curl_slist* headers) {
     curl_slist_free_all(headers);
     return req;
 }
-
 
 Response Client :: post(string URL, json query, curl_slist* headers) {
     string body;

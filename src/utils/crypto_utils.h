@@ -3,8 +3,6 @@
 
 #include <curl/curl.h>
 #include <string>
-#include <tuple>
-#include <vector>
 
 #include "../assets/asset.h"
 #include "./json/single_include/nlohmann/json.hpp"

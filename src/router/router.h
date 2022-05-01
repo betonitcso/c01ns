@@ -45,7 +45,7 @@ public:
     bool hasCallback();
     void setActive();
     void operator() ();
-    void notCompatibleWith(string opt);
+    void incompatibleWith(string opt);
     operator bool() const;
 };
 
@@ -105,6 +105,11 @@ public:
     virtual void run();
 };
 
-// WRITE CUSTOM MODES HERE
+class Strategy : public Mode {
+    Strategy(Router& r, string executable_path);
+    Strategy(Router& r);
+    Strategy(Router* r);
+    virtual void run();
+};
 
 #endif

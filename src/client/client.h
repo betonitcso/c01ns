@@ -19,24 +19,17 @@ public:
     Response (CURL* curl, string body) ;
     long int getHTTPCode();
     json getResponse();
-
-    Response& operator=(const Response& res);
 };
 
 class Client {
 protected:
     CURL* curl;
 public:
-
     Client() {
         curl = curl_easy_init();
     }
-
     Response get(string URL, curl_slist* headers = NULL);
     Response post(string URL, json query, curl_slist* headers = NULL);
-    
-    string getPublicKey();
-    string getPrivateKey();
 };
 
 

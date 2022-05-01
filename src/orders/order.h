@@ -7,6 +7,10 @@
 
 #include "../utils/json/single_include/nlohmann/json.hpp"
 #include "../assets/asset.h"
+// #include "../user/user.h"
+
+class User; // to make it work until User is inaccessible
+
 
 using std::string;
 
@@ -26,22 +30,30 @@ protected:
 public:
     Order(string asset);
     Order(Asset* asset);
+    Asset* getAsset();
+    /*
     virtual bool execute();
     virtual void info();
+    */
 };
 
 class LiveOrder : public Order {
 protected:
-    string account; // API key of user that made contract
+    string account; // API key of user that made order
+    json data;
     json query;
+    User* user;
 public:
-    LiveOrder(Asset* asset) : Order :: Order(asset) {};
-    LiveOrder(string asset) : Order :: Order(asset) {};
-    virtual bool execute(string public_key, string private_key);
+    LiveOrder(Asset* asset);
+    LiveOrder(string asset);
+    virtual json getQuery();
+    virtual void info();
+    /*
+    virtual bool execute(User& user);
     virtual bool execute();
     virtual bool cancel();
     virtual bool close();
-
+    */
     json& operator[](string param);
 };
 
