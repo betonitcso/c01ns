@@ -11,9 +11,16 @@ void Option :: setActive() {
 }
 
 Option :: operator bool() const {
+    if(this == NULL) {
+        return false;
+    }
     if(router->getArg(key) != "") {
         return true;
     } else return false;
+}
+
+void Option :: operator() (){
+    std :: cout << "YOU HAVEN'T IMPLEMENTED OPERATOR()" << std :: endl;
 }
 
 string Option :: getKey() {
@@ -23,16 +30,6 @@ string Option :: getKey() {
 bool Option :: isActive() {
     return active;
 }
-
-/*
-void Option :: incompatibleWith(string opt) {
-    for(string option : this->incompatibleOptions) {
-        if(opt == option) return;
-    }
-    incompatibleOptions.push_back(opt);
-}
-*/
-// METHODS OF INPUTOPTION CLASS
 
 InputOption* Mode :: getInputOpt(string opt){
     for(Option* storedOpt : options) {
@@ -46,6 +43,10 @@ InputOption* Mode :: getInputOpt(string opt){
 }
 
 string InputOption :: getValue() {
+    if(! this->active) {
+        std :: cerr << "[ERR] InputOption is not active, but you've tried to get its value." << std :: endl;
+        exit(1);
+    }
     return router->getArgValue(this->key);
 }
 
@@ -168,8 +169,45 @@ void Router :: run() {
 // METHODS OF INSTANT CLASS
 
 void Instant :: run() {
-    std :: cout << "Called the Instant interface." << std :: endl;
     Mode :: run();
+
+    if(*getInputOpt("buy")) {
+        if(*getInputOpt("--auth")) {
+
+            string asset = this->getInputOpt("buy")->getValue();
+            string public_key = getInputOpt("--auth")->getValue();
+            string private_key = router.getArgValue(public_key);
+            
+            std :: cout << "[INFO] Buy order for  " << asset << " received." << std :: endl;
+
+            auto user = new User(public_key, private_key);
+            auto order = new LiveOrder(asset);
+            (*order)["side"] = "buy";
+            if(*getInputOpt("-n")) {
+                (*order)["notional"] = getInputOpt("-n")->getValue();
+                order->getAsset()->info();
+            }
+            
+            else if(*getInputOpt("-q")) {
+                (*order)["qty"] = getInputOpt("-q")->getValue();
+            }
+            else {
+                throw "[ERR] Buy command operates with the -q or -n flags.";
+            }
+        }
+        else {
+            throw "[ERR] Authentication failed.";
+        }
+    } 
+    
+    else if(*(this->getInputOpt("sell"))) {
+        std :: cout << "[INFO] Sell order for  " << this->getInputOpt("sell")->getValue() << " received."  << std :: endl;
+    }
+    
+    else {
+        std :: cerr << "[ERROR] Bad input. Please choose either buy or sell options when using the instant interface." << std :: endl;
+        exit(1);
+    }
 }
 
 
@@ -178,14 +216,32 @@ void Instant :: run() {
 int main(int argc, char** argv) {
     Router* router = new Router(argc, argv);
 
+    InputOption* auth = new InputOption("--auth");
+
     InputOption* buy = new InputOption("buy");
-    Option* dumm = new Option("dumm");
-    Option* logging = new Option("--logging");
+    InputOption* sell = new InputOption("sell");
+
+    InputOption* assetIndex = new InputOption("-i");
+    InputOption* orderQuantity = new InputOption("-q"); // this is the default option
+    InputOption* orderNotional = new InputOption("-n");
+    InputOption* orderType = new InputOption("--type");
+
+    Option* sellAll = new Option("-a");
+    Option* sellPortfolio = new Option ("--portfolio");
+    InputOption* sellPercentage = new InputOption("-p");
     
     Instant* mode = new Instant(router);
+
     mode->option(buy);
-    mode->option(dumm);
-    mode->option(logging);
+    mode->option(sell);
+    mode->option(assetIndex);
+    mode->option(orderQuantity);
+    mode->option(orderNotional);
+    mode->option(orderType);
+    mode->option(sellAll);
+    mode->option(sellPortfolio);
+    mode->option(sellPercentage);
+    mode->option(auth);
 
     router->route("instant", mode);
     router->run();

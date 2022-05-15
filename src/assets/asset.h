@@ -20,11 +20,16 @@ enum Service {
 };
 
 string assetNameAdapter(Service s);
-void strToLower(string& s);
+string& strtolower(string& str);
+string strtoupper(string str);
 
 class Asset {
     protected:
-        string last_updated;
+        string last_updated; // TODO
+
+        json assetData;
+
+        // this is where coingecko data begins
 
         string id;
         string symbol;
@@ -38,8 +43,6 @@ class Asset {
         long double current_price;
         long double market_cap;
         long double ath;
-        double price_change_percentage[7];
-        double price_change_usd[7];
         double market_cap_change_percentage_24h;
 
         double sentiment[2];
@@ -49,11 +52,13 @@ class Asset {
 
         unsigned int market_cap_rank;
 
+
         bool is_alpaca_supported;
     public:
         Asset(string asset);
         virtual void info(bool verbose = false); // if verbose: prints unnecessary stuff too
-        void get(); // get data -  if live: get alpaca data too
+        virtual json& operator[](string data);
+        void get(); // sends req to coingecko, assigns res to coinGeckoData
 
         string getSymbol() {
             return symbol;
@@ -63,6 +68,7 @@ class Asset {
 
 class LiveAsset : public Asset {
     protected:
+
         long double trade_size;
         string status;
         bool is_tradable;
@@ -76,6 +82,7 @@ class LiveAsset : public Asset {
         LiveAsset(string asset);
         bool isAlpacaSupported();
         virtual void info(bool verbose = false);
+        virtual json& operator[] (string data);
 };
 
 

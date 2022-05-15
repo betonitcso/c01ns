@@ -13,6 +13,7 @@ class User; // to make it work until User is inaccessible
 
 
 using std::string;
+using ojson = nlohmann :: ordered_json;
 
 enum Status  {
     pending,
@@ -41,12 +42,12 @@ class LiveOrder : public Order {
 protected:
     string account; // API key of user that made order
     json data;
-    json query;
+    ojson query;
     User* user;
 public:
-    LiveOrder(Asset* asset);
+    LiveOrder(LiveAsset* asset);
     LiveOrder(string asset);
-    virtual json getQuery();
+    virtual ojson getQuery();
     virtual void info();
     /*
     virtual bool execute(User& user);
@@ -54,7 +55,7 @@ public:
     virtual bool cancel();
     virtual bool close();
     */
-    json& operator[](string param);
+    ojson& operator[](string param);
 };
 
 #endif

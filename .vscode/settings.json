@@ -55,6 +55,11 @@
         "ratio": "cpp",
         "iomanip": "cpp",
         "valarray": "cpp",
-        "unordered_set": "cpp"
+        "unordered_set": "cpp",
+        "bitset": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "regex": "cpp",
+        "shared_mutex": "cpp"
     }
 }

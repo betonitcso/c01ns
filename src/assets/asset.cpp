@@ -1,6 +1,6 @@
 #include "./asset.h"
 
-string& strtolower(string& str) {
+ string& strtolower(string& str) {
     for(int i = 0; i < str.length(); i++) {
         str[i] = (char) tolower(str[i]);
     }
@@ -44,6 +44,9 @@ void Asset::get() {
     string tokenURL = "https://api.coingecko.com/api/v3/coins/";
     tokenURL += id + "?localization=false&tickers=false&sparkline=false";
 
+        double price_change_percentage[7];
+        double price_change_usd[7];
+
     std::cout << "Searching for " << id << " @ https://api.coingecko.com/api/v3/coins/" << std::endl;
     Response res = client.get(tokenURL);
     if(res.getHTTPCode() != 200) {
@@ -53,6 +56,8 @@ void Asset::get() {
     try {
         json response = res.getResponse();
         json marketData = response.value("market_data", json());
+
+        assetData.update(response);
 
         // fill up object with asset data
         name = response.value("name", "N/A");
@@ -81,16 +86,23 @@ void Asset::get() {
         price_change_usd[6] = marketData.value("price_change_percentage_1y_in_currency", json()).value("usd", -1.0); // 1 year
 
         market_cap_change_percentage_24h = marketData.value("market_cap_change_percentage_24h", json());
+
+        assetData["price_change_percentage"] = price_change_percentage;
+        assetData["price_change_usd"] = price_change_usd;
+
     }
     catch(nlohmann :: detail :: type_error) {
-        std::cout << "[ERROR] An error occurred while parsing response from CoinGecko. Multiple assets might belong to the same symbol." << std::endl;
-        std::cout << "Try using the -i [coingecko_id] argument instead." << std::endl;
+        std::cerr << "[ERROR] An error occurred while parsing response from CoinGecko. Multiple assets might belong to the same symbol." << std::endl;
         exit(1);
     }
 }
 
+json& Asset :: operator[](string data) {
+    return this->assetData[data];
+}
+
+
 bool Asset :: isAlpacaSupported() {
-    std :: cerr << "[WARNING] Simple assets aren't supported by Alpaca. Please use LiveAsset instead." << std :: endl;
     return false;
 }
 
@@ -107,7 +119,7 @@ void Asset::info(bool verbose) {
     }
     std::cout << "Price: $" << std::fixed  << std::setprecision(3) <<current_price << std::endl
     << "Market cap: $" <<  market_cap <<std::endl
-    << "24h price change: " << price_change_percentage[0] << "%" << std::endl
+    << "24h price change: " << assetData["price_change_percentage"][0] << "%" << std::endl
     << "24h market cap change: " <<market_cap_change_percentage_24h << "%" << std::endl
     << "ATH: $" << ath << std::endl
     << "--------------" << std::endl
@@ -137,6 +149,9 @@ LiveAsset :: LiveAsset(string asset, string public_key, string private_key) : As
     std::cout << "Searching for " << strtoupper(symbol) << " @ https://api.alpaca.markets/v2/assets" << std::endl;
     try {
         json response = client.get(tokenURL, auth_headers).getResponse();
+
+        assetData.update(response, true);
+
         is_tradable = response.value("tradable", false);
         is_marginable = response.value("marginable", false);
         is_shortable = response.value("shortable", false);
@@ -145,15 +160,25 @@ LiveAsset :: LiveAsset(string asset, string public_key, string private_key) : As
         is_alpaca_supported = true;
     }
     catch( ... ) {
+        std :: cout << "[WARNING] Asset not supported by alpaca." << std :: endl;
         is_alpaca_supported = false;
     }
 }
 
 void LiveAsset :: info(bool verbose) {
     Asset :: info();
-    std :: cout << "Alpaca asset data: " << std :: endl;
+    std :: cout << "[INFO] Alpaca asset data: " << std :: endl;
+    std :: cout << "Supported by Alpaca: ";
+    is_alpaca_supported ? std :: cout << "true" : std :: cout <<"false";
+    std :: cout << std :: endl << "Tradable: ";
+    is_tradable ? std :: cout << "true" : std :: cout <<"false";
+    std :: cout << std :: endl;
 }
 
 bool LiveAsset :: isAlpacaSupported() {
     return is_alpaca_supported;
+}
+
+json& LiveAsset :: operator[] (string data) {
+    return assetData[data];
 }

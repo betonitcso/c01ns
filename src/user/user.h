@@ -5,9 +5,11 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <exception>
 
 // 3RD PARTY INCLUDES
 #include "../utils/json/single_include/nlohmann/json.hpp"
+#include "../client/client.h"
 #include "../assets/asset.h"
 #include "../orders/order.h"
 
@@ -17,25 +19,24 @@ using nlohmann :: json;
 
 class User {
 protected:
-    string APCA_PUBLIC_KEY;
-    string APCA_PRIVATE_KEY;
-    json data;
+    json userData; // contains APCA_PUBLIC_KEY & APCA_PRIVATE_KEY
     std :: vector<LiveOrder*> orders;
 public:
-    User(string public_key, string private_key);
+    User(string public_key, string private_key); // assigns it to data
 
     bool auth();
 
-    virtual void userInfo();
-     virtual json getUserData();
+    //virtual void info();
+    virtual json getUserData();
 
-    virtual std :: vector<LiveOrder*> getOrders(bool active = false, bool pending = false, bool closed = false);
+    // virtual std :: vector<LiveOrder*> getOrders(bool active = false, bool pending = false, bool closed = false);
     virtual LiveAsset* getAsset(string asset);
-    virtual string getPrivateKey();
-    virtual string getPublicKey();
+    // virtual string getPrivateKey();
+    // virtual string getPublicKey();
 
     virtual void execute(LiveOrder* order);
-    virtual LiveOrder* order(json query);
+    // virtual LiveOrder* order(json query);
+    virtual json& operator[]  (string data);
 };
 
 
