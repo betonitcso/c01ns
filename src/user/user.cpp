@@ -1,4 +1,5 @@
 #include "./user.h"
+#include "../utils/jporta/Test/memtrace.h"
 
 User :: User(string public_key, string private_key) {
 
@@ -9,6 +10,15 @@ User :: User(string public_key, string private_key) {
         std :: cerr << "[ERR] Unable to authenticate user." << std :: endl;
         exit(1);
     }
+}
+
+void User :: info() {
+    std :: cout << "--------------------------------------------------------------" << std :: endl
+    << "User: " << userData["account_number"] << std :: endl
+    << "Buying power: " << userData["buying_power"] << std :: endl
+    << "Cash: " << userData["cash"] << std :: endl
+    << "Equity: " << userData["equity"] << std :: endl
+    << "--------------------------------------------------------------" << std :: endl;
 }
 
 bool User :: auth() {

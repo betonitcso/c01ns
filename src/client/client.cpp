@@ -1,4 +1,5 @@
 #include "./client.h"
+#include "../utils/jporta/Test/memtrace.h"
 
 // METHODS OF RESPONSE CLASS
 

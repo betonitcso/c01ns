@@ -7,6 +7,9 @@
 #include "../utils/json/single_include/nlohmann/json.hpp"
 #include "../utils/libcurl_utils.h"
 
+#include "../utils/jporta/Test/memtrace.h"
+#include "../utils/jporta/Test/gtest_lite.h"
+
 using nlohmann:: json;
 using ojson = nlohmann :: ordered_json;
 using std::string;

@@ -1,4 +1,5 @@
 #include "./router.h"
+#include "../utils/jporta/Test/memtrace.h"
 
 // METHODS OF OPTION CLASS
 
@@ -157,6 +158,7 @@ void Router :: route(string opt, Mode* mode) {
 }
 
 void Router :: run() {
+    CLIUtils::printInitMessage();
     if(argc < 2) {
         std :: cerr << "First argument not found." << std :: endl;
         exit(1);
@@ -164,6 +166,51 @@ void Router :: run() {
         this->switchRoute();
     }    
     mode->run();
+}
+
+// METHODS OF DATA LASS
+
+void Data :: run() {
+
+    Mode :: run();
+
+    if(*getOpt("account")) {
+        std :: cout << "got account" << std :: endl;
+        if(*getInputOpt("--auth")) {
+            string public_key = getInputOpt("--auth")->getValue();
+            string private_key = router.getArgValue(public_key);
+            auto user = new User(public_key, private_key);
+            user->info();
+            delete user;
+        } else {
+            std :: cerr  << "[ERR] You have to authenticate yourself to use this feature." << std :: endl;
+            exit(1);
+        }
+    }
+
+    else if(*getInputOpt("asset")) {
+        try {
+            if(*getInputOpt("--auth")) {
+                string assetName = getInputOpt("asset")->getValue();
+                string public_key = getInputOpt("--auth")->getValue();
+                string private_key = router.getArgValue(public_key);
+                auto asset = new LiveAsset(assetName, public_key, private_key);
+                asset->info();
+                delete asset;
+            } else {
+                string assetName = getInputOpt("asset")->getValue();
+                Asset* asset = new Asset(assetName);
+                asset->info();
+                delete asset;
+            }
+        }
+        catch (std::exception e) {
+            std :: cerr << "[ERR] Failed to fetch data." << std :: endl;
+            std :: cerr << e.what() << std :: endl;
+            exit(1);
+        }
+            
+    }
 }
 
 // METHODS OF INSTANT CLASS
@@ -185,15 +232,23 @@ void Instant :: run() {
             (*order)["side"] = "buy";
             if(*getInputOpt("-n")) {
                 (*order)["notional"] = getInputOpt("-n")->getValue();
-                order->getAsset()->info();
+                (*order)["type"] = "market";
+                (*order)["time_in_force"] = "ioc";
+                user->execute(order);
             }
             
             else if(*getInputOpt("-q")) {
                 (*order)["qty"] = getInputOpt("-q")->getValue();
+                (*order)["type"] = "market";
+                (*order)["time_in_force"] = "ioc";
+                user->execute(order);
             }
             else {
                 throw "[ERR] Buy command operates with the -q or -n flags.";
             }
+
+            delete user;
+            delete order;
         }
         else {
             throw "[ERR] Authentication failed.";
@@ -202,11 +257,50 @@ void Instant :: run() {
     
     else if(*(this->getInputOpt("sell"))) {
         std :: cout << "[INFO] Sell order for  " << this->getInputOpt("sell")->getValue() << " received."  << std :: endl;
-    }
+        if(*getInputOpt("--auth")) {
+
+            string asset = this->getInputOpt("sell")->getValue();
+            string public_key = getInputOpt("--auth")->getValue();
+            string private_key = router.getArgValue(public_key);
+
+            auto user = new User(public_key, private_key);
+            auto order = new LiveOrder(asset);
+            (*order)["side"] = "sell";
+            if(*getInputOpt("-n")) {
+                (*order)["notional"] = getInputOpt("-n")->getValue();
+                (*order)["type"] = "market";
+                (*order)["time_in_force"] = "ioc";
+                user->execute(order);
+            }
+            
+            else if(*getInputOpt("-q")) {
+                (*order)["qty"] = getInputOpt("-q")->getValue();
+                (*order)["type"] = "market";
+                (*order)["time_in_force"] = "ioc";
+                user->execute(order);
+            }
+            else {
+                throw "[ERR] Sell command operates with the -q or -n flags.";
+            }
+
+            delete user;
+            delete order;
+
+        }
+        else {
+            throw "[ERR] Authentication failed.";
+        }
+    } 
     
     else {
         std :: cerr << "[ERROR] Bad input. Please choose either buy or sell options when using the instant interface." << std :: endl;
         exit(1);
+    }
+
+    for(auto opt : options) {
+        if(opt != NULL) {
+            delete opt;
+        }
     }
 }
 
@@ -215,22 +309,24 @@ void Instant :: run() {
 
 int main(int argc, char** argv) {
     Router* router = new Router(argc, argv);
+    Instant* mode = new Instant(router);
+    Data* data = new Data(router);
+
+    Option* acct = new Option("account");
+    InputOption* assetData = new InputOption("asset");
 
     InputOption* auth = new InputOption("--auth");
-
     InputOption* buy = new InputOption("buy");
     InputOption* sell = new InputOption("sell");
 
     InputOption* assetIndex = new InputOption("-i");
-    InputOption* orderQuantity = new InputOption("-q"); // this is the default option
+    InputOption* orderQuantity = new InputOption("-q");
     InputOption* orderNotional = new InputOption("-n");
     InputOption* orderType = new InputOption("--type");
 
     Option* sellAll = new Option("-a");
     Option* sellPortfolio = new Option ("--portfolio");
     InputOption* sellPercentage = new InputOption("-p");
-    
-    Instant* mode = new Instant(router);
 
     mode->option(buy);
     mode->option(sell);
@@ -243,7 +339,16 @@ int main(int argc, char** argv) {
     mode->option(sellPercentage);
     mode->option(auth);
 
+    data->option(acct);
+    data->option(assetData);
+    data->option(auth);
+
     router->route("instant", mode);
+    router->route("data", data);
     router->run();
+
+    
+
+    delete router;
     
 }

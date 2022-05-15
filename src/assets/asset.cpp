@@ -1,4 +1,5 @@
 #include "./asset.h"
+#include "../utils/jporta/Test/memtrace.h"
 
  string& strtolower(string& str) {
     for(int i = 0; i < str.length(); i++) {

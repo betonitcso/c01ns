@@ -7,6 +7,10 @@
 
 #include "../utils/json/single_include/nlohmann/json.hpp"
 #include "../assets/asset.h"
+
+#include "../utils/jporta/Test/memtrace.h"
+#include "../utils/jporta/Test/gtest_lite.h"
+
 // #include "../user/user.h"
 
 class User; // to make it work until User is inaccessible
@@ -32,10 +36,7 @@ public:
     Order(string asset);
     Order(Asset* asset);
     Asset* getAsset();
-    /*
-    virtual bool execute();
-    virtual void info();
-    */
+    virtual ~Order();
 };
 
 class LiveOrder : public Order {
@@ -43,19 +44,13 @@ protected:
     string account; // API key of user that made order
     json data;
     ojson query;
-    User* user;
 public:
     LiveOrder(LiveAsset* asset);
     LiveOrder(string asset);
     virtual ojson getQuery();
     virtual void info();
-    /*
-    virtual bool execute(User& user);
-    virtual bool execute();
-    virtual bool cancel();
-    virtual bool close();
-    */
     ojson& operator[](string param);
+    virtual ~LiveOrder();
 };
 
 #endif

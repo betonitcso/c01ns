@@ -13,6 +13,9 @@
 #include "../assets/asset.h"
 #include "../orders/order.h"
 
+#include "../utils/jporta/Test/memtrace.h"
+#include "../utils/jporta/Test/gtest_lite.h"
+
 // USING STRING & json
 using std :: string;
 using nlohmann :: json;
@@ -26,14 +29,11 @@ public:
 
     bool auth();
 
-    //virtual void info();
+    virtual void info();
     virtual json getUserData();
 
     // virtual std :: vector<LiveOrder*> getOrders(bool active = false, bool pending = false, bool closed = false);
     virtual LiveAsset* getAsset(string asset);
-    // virtual string getPrivateKey();
-    // virtual string getPublicKey();
-
     virtual void execute(LiveOrder* order);
     // virtual LiveOrder* order(json query);
     virtual json& operator[]  (string data);

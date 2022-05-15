@@ -11,6 +11,9 @@
 #include "../utils/crypto_utils.h"
 #include "../utils/json/single_include/nlohmann/json.hpp"
 
+#include "../utils/jporta/Test/memtrace.h"
+#include "../utils/jporta/Test/gtest_lite.h"
+
 using std::string;
 using json = nlohmann::json;
 
@@ -25,11 +28,9 @@ string strtoupper(string str);
 
 class Asset {
     protected:
-        string last_updated; // TODO
+        string last_updated; 
 
         json assetData;
-
-        // this is where coingecko data begins
 
         string id;
         string symbol;
@@ -58,7 +59,7 @@ class Asset {
         Asset(string asset);
         virtual void info(bool verbose = false); // if verbose: prints unnecessary stuff too
         virtual json& operator[](string data);
-        void get(); // sends req to coingecko, assigns res to coinGeckoData
+        virtual void get(); // sends req to coingecko, assigns res to coinGeckoData
 
         string getSymbol() {
             return symbol;

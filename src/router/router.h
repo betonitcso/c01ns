@@ -11,6 +11,8 @@
 
 // 3RD PARTY IMPORTS
 #include "../utils/json/single_include/nlohmann/json.hpp"
+#include "../utils/jporta/Test/memtrace.h"
+#include "../utils/jporta/Test/gtest_lite.h"
 
 // PROJECT IMPORTS
 #include "../assets/asset.h"
@@ -18,6 +20,7 @@
 #include "../orders/order.h"
 #include "../user/user.h"
 #include "../utils/crypto_utils.h"
+#include "../utils/cli_utils.h"
 
 using std::string;
 
@@ -72,8 +75,8 @@ public:
 class Mode {
 protected:
     Router& router;
-    std :: vector<Option*> options;
 public:
+    std :: vector<Option*> options;
     explicit Mode(Router& r);
     explicit Mode(Router* r);
 
@@ -114,10 +117,11 @@ public:
     virtual void run();
 };
 
-class Strategy : public Mode {
-    Strategy(Router& r, string executable_path);
-    Strategy(Router& r);
-    Strategy(Router* r);
+
+class Data : public Mode {
+public:
+    Data(Router& r) : Mode :: Mode(r) {};
+    Data(Router* r) : Mode :: Mode(r) {};
     virtual void run();
 };
 

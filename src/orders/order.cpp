@@ -1,4 +1,9 @@
 #include "./order.h"
+#include "../utils/jporta/Test/memtrace.h"
+
+Order :: ~Order() {
+    delete this->asset;
+}
 
 Order :: Order(string a) {
     this->asset = new Asset(a);
@@ -10,6 +15,10 @@ Order :: Order(Asset* a) {
 
 Asset* Order :: getAsset() {
     return asset;
+}
+
+LiveOrder :: ~LiveOrder() {
+    delete this->asset;
 }
 
 LiveOrder :: LiveOrder(string a ) : Order :: Order(new LiveAsset(a)){
