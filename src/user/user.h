@@ -9,6 +9,7 @@
 
 // 3RD PARTY INCLUDES
 #include "../utils/json/single_include/nlohmann/json.hpp"
+#include "../utils/cli_utils.h"
 #include "../client/client.h"
 #include "../assets/asset.h"
 #include "../orders/order.h"

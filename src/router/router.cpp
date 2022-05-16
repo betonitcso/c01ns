@@ -20,10 +20,6 @@ Option :: operator bool() const {
     } else return false;
 }
 
-void Option :: operator() (){
-    std :: cout << "YOU HAVEN'T IMPLEMENTED OPERATOR()" << std :: endl;
-}
-
 string Option :: getKey() {
     return this->key;
 }
@@ -45,8 +41,7 @@ InputOption* Mode :: getInputOpt(string opt){
 
 string InputOption :: getValue() {
     if(! this->active) {
-        std :: cerr << "[ERR] InputOption is not active, but you've tried to get its value." << std :: endl;
-        exit(1);
+        throw CLIUtils :: ForbiddenCommand("[ERR] InputOption is not active, but you've tried to get its value." );
     }
     return router->getArgValue(this->key);
 }
@@ -75,8 +70,7 @@ Option* Mode :: getOpt(string opt) {
 void Mode :: option(Option* opt) {
     for(auto storedOpt : options) {
         if(opt->getKey() == storedOpt->getKey()) {
-            std :: cerr << "[ERROR] Two options can't have the same keys within a mode." << std :: endl;
-            exit(1);
+            throw CLIUtils :: ForbiddenCommand("[ERR] Two options can't have the same keys within a mode." );
         }
     }
     options.push_back(opt);
@@ -104,8 +98,7 @@ Router& Router :: getRouter() {
 string Router :: getArg(string arg, unsigned int atIndex) {
     if(atIndex) {
         if(argc < atIndex -1) {
-            std :: cerr << "[ERROR] Index error." << std :: endl;
-            exit(1);
+            throw CLIUtils :: InternalError("[ERR] Index error.");
         }
         return argv[atIndex];
     }
@@ -120,8 +113,7 @@ string Router :: getArg(string arg, unsigned int atIndex) {
 string Router :: getArgValue(string arg, unsigned int atIndex) {
     if(atIndex) {
         if(argc < atIndex -2) {
-            std :: cerr << "[ERROR] Index error." << std :: endl;
-            exit(1);
+            throw CLIUtils :: InternalError("[ERR] Index error.");
         }
         return argv[atIndex+1];
     }
@@ -138,8 +130,7 @@ void Router :: switchRoute() {
     if(r != routes.end()) {
         this->mode = r->second;
     } else {
-        std :: cerr << "[ERROR] Route not found." << std :: endl;
-        exit(1);
+        throw CLIUtils :: ForbiddenCommand("[ERR] Route not found." );
     }
 }
 
@@ -148,8 +139,7 @@ void Router :: switchRoute(string opt) {
     if(r != routes.end()) {
         this->mode = r->second;
     } else {
-        std :: cerr << "[ERROR] Route not found." << std :: endl;
-        exit(1);
+        throw CLIUtils :: ForbiddenCommand("[ERR] Route not found." );
     }
 }
 
@@ -160,8 +150,7 @@ void Router :: route(string opt, Mode* mode) {
 void Router :: run() {
     CLIUtils::printInitMessage();
     if(argc < 2) {
-        std :: cerr << "First argument not found." << std :: endl;
-        exit(1);
+        throw CLIUtils :: ForbiddenCommand("[ERR] First argument not found.");
     } else {
         this->switchRoute();
     }    
@@ -171,11 +160,9 @@ void Router :: run() {
 // METHODS OF DATA LASS
 
 void Data :: run() {
-
     Mode :: run();
 
     if(*getOpt("account")) {
-        std :: cout << "got account" << std :: endl;
         if(*getInputOpt("--auth")) {
             string public_key = getInputOpt("--auth")->getValue();
             string private_key = router.getArgValue(public_key);
@@ -183,33 +170,32 @@ void Data :: run() {
             user->info();
             delete user;
         } else {
-            std :: cerr  << "[ERR] You have to authenticate yourself to use this feature." << std :: endl;
-            exit(1);
+            throw CLIUtils :: AuthError("[ERR] You have to authenticate yourself to use this feature." );
         }
     }
 
     else if(*getInputOpt("asset")) {
-        try {
-            if(*getInputOpt("--auth")) {
+        if(*getInputOpt("--auth")) {
                 string assetName = getInputOpt("asset")->getValue();
                 string public_key = getInputOpt("--auth")->getValue();
                 string private_key = router.getArgValue(public_key);
                 auto asset = new LiveAsset(assetName, public_key, private_key);
                 asset->info();
-                delete asset;
+                if(asset != nullptr) {
+                    delete asset;
+                }
             } else {
                 string assetName = getInputOpt("asset")->getValue();
                 Asset* asset = new Asset(assetName);
                 asset->info();
-                delete asset;
+                if(asset != nullptr) {
+                    delete asset;
+                }
             }
-        }
-        catch (std::exception e) {
-            std :: cerr << "[ERR] Failed to fetch data." << std :: endl;
-            std :: cerr << e.what() << std :: endl;
-            exit(1);
-        }
             
+    }
+    else {
+        throw CLIUtils :: ForbiddenCommand("[ERR] Wrong arguments given.");
     }
 }
 
@@ -244,14 +230,18 @@ void Instant :: run() {
                 user->execute(order);
             }
             else {
-                throw "[ERR] Buy command operates with the -q or -n flags.";
+                throw CLIUtils :: ForbiddenCommand("[ERR] Buy command operates with the -q or -n flags.");
             }
 
-            delete user;
-            delete order;
+            if(user != nullptr) {
+                delete user;
+            }
+            if(order != nullptr) {
+                delete order;
+            }
         }
         else {
-            throw "[ERR] Authentication failed.";
+            throw CLIUtils :: AuthError("[ERR] Authentication failed.");
         }
     } 
     
@@ -280,75 +270,83 @@ void Instant :: run() {
                 user->execute(order);
             }
             else {
-                throw "[ERR] Sell command operates with the -q or -n flags.";
+                throw CLIUtils :: ForbiddenCommand("[ERR] Sell command operates with the -q or -n flags.");
             }
-
-            delete user;
-            delete order;
 
         }
         else {
-            throw "[ERR] Authentication failed.";
+            throw CLIUtils :: AuthError("[ERR] Authentication failed.");
         }
     } 
     
     else {
-        std :: cerr << "[ERROR] Bad input. Please choose either buy or sell options when using the instant interface." << std :: endl;
-        exit(1);
+        throw CLIUtils :: ForbiddenCommand("[ERROR] Bad input. Please choose either buy or sell options when using the instant interface.");
     }
+}
 
-    for(auto opt : options) {
-        if(opt != NULL) {
-            delete opt;
-        }
+
+Router :: ~Router() {
+    if(this != nullptr) {
+        for(auto mode : routes) {
+            if(mode.second != nullptr) {
+                delete mode.second;
+                mode.second = nullptr;
+            }
     }
+    }
+}
+
+Mode :: ~Mode() {
+    for(auto opt : options) {
+            if(opt != nullptr) {
+                delete opt;
+                opt = nullptr;
+            }
+        }
 }
 
 
 // MAIN FUNC
 
 int main(int argc, char** argv) {
-    Router* router = new Router(argc, argv);
-    Instant* mode = new Instant(router);
-    Data* data = new Data(router);
-
-    Option* acct = new Option("account");
-    InputOption* assetData = new InputOption("asset");
-
+    Router* router = new Router(argc, argv);                                                                                                                                                                       
+    Instant* mode = new Instant(router);                                                                                                                                                                           
+    Data* data = new Data(router);                                                                                                                                                                                 
+                                                                                                                                                                                                                   
+    Option* account = new Option("account");                                                                                                                                                                          
+    InputOption* assetData = new InputOption("asset");                                                                                                                                                             
+                                                                                                                                                                                                                   
     InputOption* auth = new InputOption("--auth");
-    InputOption* buy = new InputOption("buy");
-    InputOption* sell = new InputOption("sell");
+    InputOption* dataAuth = new InputOption("--auth");                                                                                                                                                         
+    InputOption* buy = new InputOption("buy");                                                                                                                                                                     
+    InputOption* sell = new InputOption("sell");                                                                                                                                                                   
+                                                                                                                                                                                                                                                                                                                                                                         
+    InputOption* orderQuantity = new InputOption("-q");                                                                                                                                                            
+    InputOption* orderNotional = new InputOption("-n");                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                         
+                                                                                                                                                                                                                   
+    mode->option(buy);                                                                                                                                                                                             
+    mode->option(sell);                                                                                                                                                                                                                                                                                                                                                                 
+    mode->option(orderQuantity);                                                                                                                                                                                   
+    mode->option(orderNotional);                                                                                                                                                                                                                                                                                                                                                                
+    mode->option(auth);  
 
-    InputOption* assetIndex = new InputOption("-i");
-    InputOption* orderQuantity = new InputOption("-q");
-    InputOption* orderNotional = new InputOption("-n");
-    InputOption* orderType = new InputOption("--type");
-
-    Option* sellAll = new Option("-a");
-    Option* sellPortfolio = new Option ("--portfolio");
-    InputOption* sellPercentage = new InputOption("-p");
-
-    mode->option(buy);
-    mode->option(sell);
-    mode->option(assetIndex);
-    mode->option(orderQuantity);
-    mode->option(orderNotional);
-    mode->option(orderType);
-    mode->option(sellAll);
-    mode->option(sellPortfolio);
-    mode->option(sellPercentage);
-    mode->option(auth);
-
-    data->option(acct);
+    data->option(account);
     data->option(assetData);
-    data->option(auth);
+    data->option(dataAuth);
 
     router->route("instant", mode);
     router->route("data", data);
-    router->run();
 
+    try {
+        router->run();
+        delete router;
+    }
+    catch (std :: exception& e) {
+        std :: cout << e.what() << std :: endl;
+        throw(e);
+        delete router;
+    }
     
-
-    delete router;
     
 }

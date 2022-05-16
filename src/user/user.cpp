@@ -7,8 +7,7 @@ User :: User(string public_key, string private_key) {
     userData["private_key"] = private_key;
 
     if(!auth()) {
-        std :: cerr << "[ERR] Unable to authenticate user." << std :: endl;
-        exit(1);
+        throw CLIUtils :: AuthError("[ERR] Unable to authenticate user.");
     }
 }
 
@@ -31,7 +30,7 @@ bool User :: auth() {
     if(response.getHTTPCode() != 200) {
         return false;
     } else {
-        userData.update(response.getResponse(), true); // TODO: decide whether or not you need to merge
+        userData.update(response.getResponse(), true);
         return true;
     }
 }
@@ -49,16 +48,12 @@ void User :: execute(LiveOrder* order) {
     auto res = client.post("https://api.alpaca.markets/v2/orders", query, headers);
 
     if(res.getHTTPCode() != 200) {
-        std :: cerr << "[ERR] An error occurred while processing order." << std :: endl;
-        std :: cerr << std :: setw(4) << res.getResponse() << std :: endl;
-        exit(1);
+        throw CLIUtils :: QueryError("[ERR] An error occurred while processing order.");
     } else {
         auto response = res.getResponse();
         std :: cout << "[INFO] Order successfully executed." << std :: endl;
         std :: cout << "Order filled for " << response["symbol"] << " @ " << response["created_at"] << std :: endl;
     }
-
-    
 }
 
 json User :: getUserData() {
@@ -69,7 +64,7 @@ json User :: getUserData() {
 
 json& User :: operator[] (string data) {
     if(data == "private_key") {
-        throw std::invalid_argument("[ERR] Private key is not accessible after assignment.");
+        throw CLIUtils :: ForbiddenCommand("[ERR] Private key is not accessible after assignment.");
     }
     return userData[data];
 }
@@ -78,18 +73,3 @@ LiveAsset* User :: getAsset(string asset) {
     LiveAsset* a = new LiveAsset(asset);
     return a;
 }
-
-
-/*
-int main() {
-    auto user = new User("AKRMS5NYNQNY8KES77J8", "7RlH4up0x4LMn2CkEFRX2S5PEb8sl6kHt5vrF4O4");
-    LiveOrder* myOrder = new LiveOrder("btc");
-    myOrder->getAsset()->info();
-    (*myOrder)["notional"] = 5.0;
-    (*myOrder)["side"] = "buy";
-    (*myOrder)["type"] = "market";
-    (*myOrder)["time_in_force"] = "ioc";
-
-    user->execute(myOrder);
-}
-*/

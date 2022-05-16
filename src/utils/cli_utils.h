@@ -3,12 +3,13 @@
 
 #include <iostream>
 #include <string>
+#include <exception>
 
 using std::string;
 
 namespace CLIUtils {
 
-    void printInitMessage() {
+    inline void printInitMessage() {
         std::cout << std::endl << "***************************************************" << std::endl 
             << R"(
  ██████╗ ██████╗  ██╗███╗   ██╗███████╗
@@ -27,6 +28,64 @@ namespace CLIUtils {
             << "***************************************************" << std::endl;
 
     };
+
+
+
+    // EXCEPTIONS
+
+// template from StackOverFlow: https://stackoverflow.com/questions/8152720/correct-way-to-inherit-from-stdexception
+class ForbiddenCommand: public std::exception {
+  public:
+   explicit ForbiddenCommand(const char* message) : msg(message) {}
+   ForbiddenCommand(ForbiddenCommand const&) noexcept = default;
+
+   ForbiddenCommand& operator=(ForbiddenCommand const&) noexcept = default;
+  ~ForbiddenCommand() override = default;
+
+  const char* what() const noexcept override { return msg; }
+ private:
+  const char* msg;
+};
+
+class AuthError: public std::exception {
+  public:
+   explicit AuthError(const char* message) : msg(message) {}
+   AuthError(AuthError const&) noexcept = default;
+
+   AuthError& operator=(AuthError const&) noexcept = default;
+  ~AuthError() override = default;
+
+  const char* what() const noexcept override { return msg; }
+ private:
+  const char* msg;
+};
+
+class QueryError: public std::exception {
+  public:
+   explicit QueryError(const char* message) : msg(message) {}
+   QueryError(QueryError const&) noexcept = default;
+
+   QueryError& operator=(QueryError const&) noexcept = default;
+  ~QueryError() override = default;
+
+  const char* what() const noexcept override { return msg; }
+ private:
+  const char* msg;
+};
+
+class InternalError: public std::exception {
+  public:
+   explicit InternalError(const char* message) : msg(message) {}
+   InternalError(InternalError const&) noexcept = default;
+
+   InternalError& operator=(InternalError const&) noexcept = default;
+  ~InternalError() override = default;
+
+  const char* what() const noexcept override { return msg; }
+ private:
+  const char* msg;
+};
+
 }
 
 #endif

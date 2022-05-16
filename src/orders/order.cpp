@@ -2,7 +2,7 @@
 #include "../utils/jporta/Test/memtrace.h"
 
 Order :: ~Order() {
-    delete this->asset;
+    return;
 }
 
 Order :: Order(string a) {
@@ -22,11 +22,6 @@ LiveOrder :: ~LiveOrder() {
 }
 
 LiveOrder :: LiveOrder(string a ) : Order :: Order(new LiveAsset(a)){
-    /*
-    if(!this->asset->isAlpacaSupported()) {
-        std :: cerr << "[ERROR] currency not supported by alpaca." << std :: endl;
-    }
-    */
     this->query = json();
     query["symbol"] = (*asset) ["symbol"];
 }

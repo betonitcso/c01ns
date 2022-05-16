@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 #include <functional>
+#include <stdexcept>
 
 // 3RD PARTY IMPORTS
 #include "../utils/json/single_include/nlohmann/json.hpp"
@@ -31,6 +32,7 @@ class Mode;
 class Option;
 class OptionCallback;
 
+
 // OPTION & INPUTOPTION CLASSES
 class Option{
 protected:
@@ -40,19 +42,13 @@ protected:
 
     Router* router;
     Mode* mode;
-    std :: function<void(Router*, Mode*, Option*)> callback;
 public:
     explicit Option(string key, bool defaultActive = false) : key(key), active(defaultActive) {};
-
-    // set callback to true, set function to callback fn
-    // TODO: DEFINE THIS
-    //explicit Option(string key, std :: function<void(Router*, Mode*, Option*)> callback, bool defaultActive = false);
 
     void setRouter(Router* r);
     string getKey();
     bool isActive();
     void setActive();
-    virtual void operator() (); // if option has callback, call it, else don't do anything.
     operator bool() const;
 };
 
@@ -60,10 +56,6 @@ class InputOption : public Option {
     string value;
 public:
     explicit InputOption(string key, string value = "", bool defaultActive = false) :Option(key, defaultActive), value(value) {};
-
-    // TODO: DEFINE THIS
-    // std :: function<> is in second place because it doesn't have a default value.
-    //explicit InputOption(string key, std :: function<void(Router*, Mode*, InputOption*)> callback, string value = "", bool defaultActive = false);
 
     void setValue(string input);
     string getValue();
@@ -79,7 +71,7 @@ public:
     std :: vector<Option*> options;
     explicit Mode(Router& r);
     explicit Mode(Router* r);
-
+    ~Mode();
     void option(Option* opt);
     void option(string opt); // TODO:  THIS NEEDS TO BE DEFINED
     Option* getOpt(string opt);
@@ -97,7 +89,7 @@ class Router {
     Mode* mode;
 public:
     Router(int argc, char**argv);
-
+    ~Router();
     void route(string opt, Mode* mode);
     void run();
     void switchRoute();

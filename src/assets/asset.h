@@ -6,7 +6,9 @@
 #include <curl/curl.h>
 #include <vector>
 #include <unistd.h>
+#include <stdexcept>
 
+#include "../utils/cli_utils.h"
 #include "../client/client.h"
 #include "../utils/crypto_utils.h"
 #include "../utils/json/single_include/nlohmann/json.hpp"

@@ -51,8 +51,7 @@ void Asset::get() {
     std::cout << "Searching for " << id << " @ https://api.coingecko.com/api/v3/coins/" << std::endl;
     Response res = client.get(tokenURL);
     if(res.getHTTPCode() != 200) {
-        std :: cerr << "[ERR] Couldn't find token." << std::endl;
-        exit(1);
+        throw CLIUtils :: QueryError("[ERR] Couldn't find token.");
     }
     try {
         json response = res.getResponse();
@@ -93,8 +92,7 @@ void Asset::get() {
 
     }
     catch(nlohmann :: detail :: type_error) {
-        std::cerr << "[ERROR] An error occurred while parsing response from CoinGecko. Multiple assets might belong to the same symbol." << std::endl;
-        exit(1);
+       throw CLIUtils :: QueryError("[ERROR] An error occurred while parsing response from CoinGecko. Multiple assets might belong to the same symbol." );
     }
 }
 
